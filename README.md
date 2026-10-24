@@ -27,7 +27,11 @@ python -m venv .venv
 .\.venv\Scripts\python facial.py
 ```
 
-Pressione `q` para fechar a janela.
+Na primeira vez o app grava o seu rosto; depois, só reconhece. Por enquanto, ao reconhecer o seu rosto ele abre a calculadora (teste).
+
+- `facial.py --cadastrar` — grava mais amostras (ex.: com fone, de óculos, outra luz)
+- `facial.py --novo` — apaga o rosto salvo e grava do zero
+- `q` — fecha a janela
 
 ## 🔐 Segurança e privacidade
 

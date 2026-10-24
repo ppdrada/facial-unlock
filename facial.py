@@ -1,105 +1,76 @@
-import os
+import subprocess
 import sys
+from collections import deque
 
-import cv2
+from face_engine import MATCH_THRESHOLD, FaceEngine
+from register_face import register
+from window import GRAY, GREEN, RED, CameraWindow
 
-WINDOW_TITLE = "Facial Unlock"
-
-
-def resource_path(rel):
-    # funciona tanto rodando o .py quanto o executável gerado pelo PyInstaller
-    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base, rel)
-
-
-ICON_ICNS = resource_path(os.path.join("assets", "icon", "icon.icns"))
-ICON_ICO = resource_path(os.path.join("assets", "icon", "icon.ico"))
+# desbloqueia quando o rosto bate em MATCH_FRAMES dos últimos RECENT_FRAMES frames
+MATCH_FRAMES = 5
+RECENT_FRAMES = 10
 
 
-def set_app_icon():
-    # macOS: troca o ícone do Python no Dock pelo ícone do app
+def open_calculator():
+    # teste de desbloqueio: abre a calculadora do sistema
     if sys.platform == "darwin":
-        try:
-            from AppKit import NSApplication, NSImage
-
-            image = NSImage.alloc().initWithContentsOfFile_(ICON_ICNS)
-            NSApplication.sharedApplication().setApplicationIconImage_(image)
-        except Exception as e:
-            print(f"Não consegui carregar o ícone: {ICON_ICNS} ({e})")
-
-    # Windows: faz a barra de tarefas usar o ícone do app (em vez do ícone do Python)
+        subprocess.Popen(["open", "-a", "Calculator"])
     elif sys.platform == "win32":
-        try:
-            import ctypes
-
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("facial.unlock")
-        except Exception:
-            pass
+        subprocess.Popen("calc.exe")
 
 
-def set_window_icon():
-    # Windows: aplica o .ico na janela do OpenCV (título + barra de tarefas)
-    if sys.platform != "win32":
-        return
-    try:
-        import ctypes
+def unlock(engine=None):
+    """Olha a webcam e retorna True quando reconhece o dono."""
+    engine = engine or FaceEngine()
+    if not engine.has_owner():
+        print("Nenhum rosto salvo.")
+        return False
 
-        user32 = ctypes.windll.user32
-        hwnd = user32.FindWindowW(None, WINDOW_TITLE)
-        if not hwnd:
+    recent = deque(maxlen=RECENT_FRAMES)
+    with CameraWindow("Q: sair") as win:
+        while True:
+            frame = win.read()
+            if frame is None:
+                return False
+            faces = engine.detect(frame)
+
+            if len(faces) == 0:
+                recent.append(False)
+                win.draw_bar(frame, "Procurando rosto...", GRAY)
+            else:
+                face = faces[0]
+                score = engine.score(engine.feature(frame, face))
+                if score >= MATCH_THRESHOLD:
+                    recent.append(True)
+                    win.draw_bar(frame, "Rosto reconhecido!", GREEN)
+                    win.draw_face(frame, face, GREEN, f"Voce ({score:.2f})")
+                else:
+                    recent.append(False)
+                    win.draw_bar(frame, "Rosto desconhecido", RED)
+                    win.draw_face(frame, face, RED, f"Desconhecido ({score:.2f})")
+
+            if sum(recent) >= MATCH_FRAMES:
+                win.show(frame, wait_ms=800)  # mostra o "reconhecido" por um instante
+                return True
+
+            if win.show(frame) == "q":
+                return False
+
+
+def main():
+    # --cadastrar grava mais amostras; --novo apaga as antigas e grava do zero
+    reset = "--novo" in sys.argv
+    engine = FaceEngine()
+
+    # primeira vez (ou pedido pelo usuário): grava o rosto antes de reconhecer
+    if reset or "--cadastrar" in sys.argv or not engine.has_owner():
+        if not register(engine, reset=reset):
             return
-        IMAGE_ICON, LR_LOADFROMFILE, LR_DEFAULTSIZE = 1, 0x10, 0x40
-        WM_SETICON, ICON_SMALL, ICON_BIG = 0x80, 0, 1
-        icon = user32.LoadImageW(None, ICON_ICO, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE)
-        user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
-        user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
-    except Exception as e:
-        print(f"Não consegui carregar o ícone: {ICON_ICO} ({e})")
 
-
-class FacialUnlock:
-    """Abre a webcam e detecta rostos em tempo real."""
-
-    def __init__(self, camera_index=0):
-        self.camera_index = camera_index
-        self.camera = None
-        self.detector = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-        )
-
-    def open_camera(self):
-        self.camera = cv2.VideoCapture(self.camera_index)
-        if not self.camera.isOpened():
-            raise RuntimeError("Não foi possível abrir a webcam.")
-
-    def detect_faces(self, frame):
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        return self.detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(80, 80))
-
-    def draw_faces(self, frame, faces):
-        for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-    def run(self):
-        set_app_icon()
-        self.open_camera()
-        print("Webcam aberta. Pressione 'q' para sair.")
-        cv2.namedWindow(WINDOW_TITLE)
-        set_window_icon()
-        try:
-            while True:
-                ok, frame = self.camera.read()
-                if not ok:
-                    break
-                faces = self.detect_faces(frame)
-                self.draw_faces(frame, faces)
-                cv2.imshow(WINDOW_TITLE, frame)
-                if cv2.waitKey(1) & 0xFF == ord("q"):
-                    break
-        finally:
-            self.camera.release()
-            cv2.destroyAllWindows()
+    if unlock(engine):
+        print("Desbloqueado!")
+        open_calculator()
 
 
 if __name__ == "__main__":
-    FacialUnlock().run()
+    main()

@@ -18,3 +18,6 @@ faces/
 Thumbs.db
 .vscode/
 .idea/
+
+# Modelos baixados automaticamente na primeira execução
+models/
