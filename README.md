@@ -1,3 +1,5 @@
+<img src="assets/icon/icon.svg" alt="Ícone do Facial Unlock" width="128">
+
 # 🔓 Facial Unlock
 
 Desbloqueia o computador usando a webcam comum para o login.
@@ -6,6 +8,26 @@ Desbloqueia o computador usando a webcam comum para o login.
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white)
 ![macOS](https://img.shields.io/badge/macOS-suportado-black?logo=apple)
 ![Windows](https://img.shields.io/badge/Windows-suportado-0078D6?logo=windows)
+
+## 🚀 Como rodar
+
+**macOS**
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python facial.py
+```
+
+**Windows**
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\pip install -r requirements.txt
+.\.venv\Scripts\python facial.py
+```
+
+Pressione `q` para fechar a janela.
 
 ## 🔐 Segurança e privacidade
 
