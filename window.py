@@ -79,6 +79,7 @@ class CameraWindow:
     def __exit__(self, *exc):
         self.camera.release()
         cv2.destroyAllWindows()
+        cv2.waitKey(1)  # no macOS a janela só fecha de verdade depois de processar os eventos
 
     def read(self):
         ok, frame = self.camera.read()

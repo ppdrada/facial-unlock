@@ -27,11 +27,13 @@ python -m venv .venv
 .\.venv\Scripts\python facial.py
 ```
 
-Na primeira vez o app grava o seu rosto; depois, só reconhece. Por enquanto, ao reconhecer o seu rosto ele abre a calculadora (teste).
+A tela inicial mostra se já existe um rosto cadastrado e permite:
 
-- `facial.py --cadastrar` — grava mais amostras (ex.: com fone, de óculos, outra luz)
-- `facial.py --novo` — apaga o rosto salvo e grava do zero
-- `q` — fecha a janela
+- **Cadastrar rosto** — grava o seu rosto pela webcam
+- **Adicionar amostras** — grava mais amostras (ex.: com fone, de óculos, outra luz)
+- **Testar reconhecimento** — por enquanto, ao reconhecer o seu rosto o app abre a calculadora
+
+Para cadastrar, o app pede a senha do computador (Touch ID/senha no Mac, Windows Hello no Windows).
 
 ## 🔐 Segurança e privacidade
 
