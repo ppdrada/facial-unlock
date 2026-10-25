@@ -1,13 +1,15 @@
-# <img src="assets/icon/icon.svg" alt="Ícone do Facial Unlock" height="32" align="top"> Facial Unlock
+# <img src="assets/icon/icon.svg" alt="Facial Unlock icon" height="32" align="top"> Facial Unlock
 
-Desbloqueia o computador usando a webcam comum para o login.
+🇺🇸 **English** | 🇧🇷 [Português](README.pt-BR.md)
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-orange)
+Unlocks your computer using a regular webcam at login.
+
+![Status](https://img.shields.io/badge/status-in%20development-orange)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white)
-![macOS](https://img.shields.io/badge/macOS-suportado-black?logo=apple)
-![Windows](https://img.shields.io/badge/Windows-suportado-0078D6?logo=windows)
+![macOS](https://img.shields.io/badge/macOS-supported-black?logo=apple)
+![Windows](https://img.shields.io/badge/Windows-supported-0078D6?logo=windows)
 
-## 🚀 Como rodar
+## 🚀 How to run
 
 **macOS**
 
@@ -25,20 +27,20 @@ python -m venv .venv
 .\.venv\Scripts\python facial.py
 ```
 
-A tela inicial mostra se já existe um rosto cadastrado e permite:
+The home screen shows whether a face is already registered and lets you:
 
-- **Cadastrar rosto** — grava o seu rosto pela webcam
-- **Adicionar amostras** — grava mais amostras (ex.: com fone, de óculos, outra luz)
-- **Testar reconhecimento** — por enquanto, ao reconhecer o seu rosto o app abre a calculadora
+- **Register face** — records your face through the webcam
+- **Add samples** — records more samples (e.g. with headphones, glasses, different lighting)
+- **Test recognition** — recognizes your face and, for now, opens the calculator
 
-Para cadastrar, o app pede a senha do computador (Touch ID/senha no Mac, Windows Hello no Windows).
+To register, the app asks for your computer password (Touch ID/password on Mac, Windows Hello on Windows).
 
-## 🔐 Segurança e privacidade
+## 🔐 Security and privacy
 
-- Os dados do seu rosto ficam **só no seu computador**, nunca são enviados para a internet.
-- A **senha continua funcionando** como alternativa — o reconhecimento facial é um atalho, não uma substituição.
-- ⚠️ Webcams comuns podem ser enganadas por fotos; o anti‑spoofing é etapa obrigatória antes de usar no dia a dia.
+- Your face data stays **only on your computer** and is never sent to the internet.
+- Your **password still works** as an alternative — face recognition is a shortcut, not a replacement.
+- 📸 Against photos: after recognizing your face, the app asks you to **stay still and then smile**. A photo can't change its expression.
 
-## Projeto
+## Project
 
-Teste para ver se vai funcionar :P
+Just testing to see if it works :P
