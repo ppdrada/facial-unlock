@@ -5,15 +5,21 @@ import urllib.request
 import cv2
 import numpy as np
 
+# esconde avisos internos do OpenCV no terminal
+cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+
 # similaridade mínima (cosseno) para considerar o mesmo rosto — valor recomendado pelo SFace
 MATCH_THRESHOLD = 0.363
 
-MODELS_URL = "https://github.com/opencv/opencv_zoo/raw/main/models"
+OPENCV_ZOO = "https://github.com/opencv/opencv_zoo/raw/main/models"
+MEDIAPIPE = "https://storage.googleapis.com/mediapipe-models"
 DETECTOR_MODEL = "face_detection_yunet_2023mar.onnx"
 RECOGNIZER_MODEL = "face_recognition_sface_2021dec.onnx"
+LANDMARKER_MODEL = "face_landmarker.task"
 MODELS = {
-    DETECTOR_MODEL: f"{MODELS_URL}/face_detection_yunet/{DETECTOR_MODEL}",
-    RECOGNIZER_MODEL: f"{MODELS_URL}/face_recognition_sface/{RECOGNIZER_MODEL}",
+    DETECTOR_MODEL: f"{OPENCV_ZOO}/face_detection_yunet/{DETECTOR_MODEL}",
+    RECOGNIZER_MODEL: f"{OPENCV_ZOO}/face_recognition_sface/{RECOGNIZER_MODEL}",
+    LANDMARKER_MODEL: f"{MEDIAPIPE}/face_landmarker/face_landmarker/float16/1/{LANDMARKER_MODEL}",
 }
 
 
@@ -34,7 +40,7 @@ def ensure_models():
     for name, url in MODELS.items():
         path = os.path.join(MODELS_DIR, name)
         if not os.path.exists(path):
-            print(f"Baixando {name}...")
+            print(f"Downloading {name}...")
             urllib.request.urlretrieve(url, path)
 
 

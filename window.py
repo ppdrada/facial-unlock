@@ -27,7 +27,7 @@ def set_app_icon():
             image = NSImage.alloc().initWithContentsOfFile_(ICON_ICNS)
             NSApplication.sharedApplication().setApplicationIconImage_(image)
         except Exception as e:
-            print(f"Não consegui carregar o ícone: {ICON_ICNS} ({e})")
+            print(f"Could not load the icon: {ICON_ICNS} ({e})")
 
     # Windows: faz a barra de tarefas usar o ícone do app (em vez do ícone do Python)
     elif sys.platform == "win32":
@@ -56,7 +56,7 @@ def set_window_icon():
         user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, icon)
         user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, icon)
     except Exception as e:
-        print(f"Não consegui carregar o ícone: {ICON_ICO} ({e})")
+        print(f"Could not load the icon: {ICON_ICO} ({e})")
 
 
 class CameraWindow:
@@ -71,7 +71,7 @@ class CameraWindow:
         set_app_icon()
         self.camera = cv2.VideoCapture(self.camera_index)
         if not self.camera.isOpened():
-            raise RuntimeError("Não foi possível abrir a webcam.")
+            raise RuntimeError("Could not open the webcam.")
         cv2.namedWindow(WINDOW_TITLE)
         set_window_icon()
         return self
@@ -106,8 +106,23 @@ class CameraWindow:
         cv2.putText(frame, text, (15, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.8, WHITE, 2)
 
     @staticmethod
-    def draw_text(frame, text, y):
-        cv2.putText(frame, text, (15, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, WHITE, 2)
+    def draw_caption(frame, text, face=None, color=WHITE):
+        """Legenda grande (só o texto) centralizada embaixo do rosto (ou embaixo na tela, se não houver rosto)."""
+        h, w = frame.shape[:2]
+        font, scale, thick = cv2.FONT_HERSHEY_SIMPLEX, 1.1, 2
+        (tw, th), _ = cv2.getTextSize(text, font, scale, thick)
+        if face is not None:
+            fx, fy, fw, fh = face[:4].astype(int)
+            cx, y = fx + fw // 2, fy + fh + 50
+        else:
+            cx, y = w // 2, h - 90
+        x = min(max(cx - tw // 2, 10), w - tw - 10)
+        y = min(max(y, th + 10), h - 60)
+        cv2.putText(frame, text, (x, y), font, scale, color, thick)
+
+    @staticmethod
+    def draw_text(frame, text, y, color=WHITE):
+        cv2.putText(frame, text, (15, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
     @staticmethod
     def draw_face(frame, face, color, label=None):

@@ -44,9 +44,9 @@ class HomeScreen:
         tk.Label(self.root, image=self.icon, bg=BG).pack(pady=(36, 12))
         tk.Label(self.root, text="Facial Unlock", bg=BG, fg=TEXT, font=("Helvetica", 24, "bold")).pack()
 
-        self.status = tk.Label(self.root, bg=BG, font=("Helvetica", 14))
+        self.status = tk.Label(self.root, bg=BG, font=("Helvetica", 10))
         self.status.pack(pady=(14, 4))
-        self.message = tk.Label(self.root, bg=BG, fg=MUTED, font=("Helvetica", 12))
+        self.message = tk.Label(self.root, bg=BG, fg=MUTED, font=("Helvetica", 10))
         self.message.pack(pady=(0, 18))
 
         self.buttons = tk.Frame(self.root, bg=BG)
@@ -67,12 +67,21 @@ class HomeScreen:
     def button(self, text, command, primary=False):
         # Label no lugar de Button: no macOS o Button ignora as cores
         bg, hover = (PRIMARY, PRIMARY_HOVER) if primary else (BUTTON, BUTTON_HOVER)
-        b = tk.Label(self.buttons, text=text, bg=bg, fg=TEXT, font=("Helvetica", 14),
-                     width=22, pady=10, cursor="hand2")
+        b = tk.Label(self.buttons, text=text, bg=bg, fg=TEXT, font=("Helvetica", 12),
+                     width=22, pady=8, cursor="hand2")
         b.bind("<Button-1>", lambda e: command())
         b.bind("<Enter>", lambda e: b.configure(bg=hover))
         b.bind("<Leave>", lambda e: b.configure(bg=bg))
         b.pack(pady=5)
+
+    def link(self, text, command):
+        # texto clicável discreto, estilo "Esqueceu a senha?"
+        l = tk.Label(self.buttons, text=text, bg=BG, fg=MUTED, font=("Helvetica", 11),
+                     cursor="hand2")
+        l.bind("<Button-1>", lambda e: command())
+        l.bind("<Enter>", lambda e: l.configure(fg=TEXT))
+        l.bind("<Leave>", lambda e: l.configure(fg=MUTED))
+        l.pack(pady=(14, 0))
 
     def refresh(self):
         for child in self.buttons.winfo_children():
@@ -80,13 +89,13 @@ class HomeScreen:
 
         total = len(self.engine.known_faces)
         if total:
-            self.status.configure(text=f"●  Rosto cadastrado ({total} amostras)", fg=GREEN)
-            self.button("Testar reconhecimento", self.on_test, primary=True)
-            self.button("Adicionar amostras", self.on_add)
-            self.button("Cadastrar novo rosto", self.on_new)
+            self.status.configure(text=f"●  Face registered ({total} samples)", fg=GREEN)
+            self.button("Test recognition", self.on_test, primary=True)
+            self.button("Add samples", self.on_add)
+            self.link("Register a new face", self.on_new)
         else:
-            self.status.configure(text="●  Nenhum rosto cadastrado", fg=ORANGE)
-            self.button("Cadastrar rosto", self.on_new, primary=True)
+            self.status.configure(text="●  No face registered", fg=ORANGE)
+            self.button("Register face", self.on_new, primary=True)
 
     def say(self, text, color=MUTED):
         self.message.configure(text=text, fg=color)
@@ -97,6 +106,9 @@ class HomeScreen:
         self.root.update()
         try:
             return action()
+        except RuntimeError as e:
+            self.say(str(e), RED)
+            return None
         finally:
             self.root.deiconify()
             self.root.lift()
@@ -105,27 +117,29 @@ class HomeScreen:
     # ---------- ações ----------
 
     def on_test(self):
-        if self.run_camera(lambda: unlock(self.engine)):
-            self.say("Reconhecido! Abrindo a calculadora...", GREEN)
+        result = self.run_camera(lambda: unlock(self.engine))
+        if result:
+            self.say("Recognized! Opening the calculator...", GREEN)
             open_calculator()
-        else:
-            self.say("Teste cancelado.")
+        elif result is False:
+            self.say("Test cancelled.")
 
     def on_add(self):
-        self.record(reset=False, reason="adicionar amostras ao seu rosto")
+        self.record(reset=False, reason="add samples to your face")
 
     def on_new(self):
-        self.record(reset=True, reason="cadastrar um novo rosto")
+        self.record(reset=True, reason="register a new face")
 
     def record(self, reset, reason):
         # por segurança, só o dono do computador pode cadastrar rostos
-        if not verify_owner(f"O Facial Unlock precisa da sua senha para {reason}."):
-            self.say("Senha não confirmada.", RED)
+        if not verify_owner(f"Facial Unlock needs your password to {reason}."):
+            self.say("Password not confirmed.", RED)
             return
-        if self.run_camera(lambda: register(self.engine, reset=reset)):
-            self.say("Rosto salvo!", GREEN)
-        else:
-            self.say("Cadastro cancelado.")
+        result = self.run_camera(lambda: register(self.engine, reset=reset))
+        if result:
+            self.say("Face saved!", GREEN)
+        elif result is False:
+            self.say("Registration cancelled.")
 
     def run(self):
         self.root.mainloop()

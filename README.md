@@ -1,6 +1,4 @@
-<img src="assets/icon/icon.svg" alt="Ícone do Facial Unlock" width="128">
-
-# 🔓 Facial Unlock
+# <img src="assets/icon/icon.svg" alt="Ícone do Facial Unlock" height="32" align="top"> Facial Unlock
 
 Desbloqueia o computador usando a webcam comum para o login.
 

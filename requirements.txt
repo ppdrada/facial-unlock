@@ -1,5 +1,6 @@
-opencv-python<5
+opencv-contrib-python
 numpy
+mediapipe
 pyobjc-framework-Cocoa; sys_platform == "darwin"
 pyobjc-framework-LocalAuthentication; sys_platform == "darwin"
 winrt-runtime; sys_platform == "win32"

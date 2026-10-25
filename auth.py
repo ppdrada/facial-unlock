@@ -19,7 +19,7 @@ def _verify_macos(reason):
     try:
         from LocalAuthentication import LAContext, LAPolicyDeviceOwnerAuthentication
     except ImportError:
-        print("Instale pyobjc-framework-LocalAuthentication para pedir a senha.")
+        print("Install pyobjc-framework-LocalAuthentication to ask for the password.")
         return False
 
     context = LAContext.alloc().init()
@@ -46,13 +46,13 @@ def _verify_windows(reason):
             UserConsentVerifierAvailability,
         )
     except ImportError:
-        print("Instale winrt-Windows.Security.Credentials.UI para pedir a senha.")
+        print("Install winrt-Windows.Security.Credentials.UI to ask for the password.")
         return False
 
     async def check():
         available = await UserConsentVerifier.check_availability_async()
         if available != UserConsentVerifierAvailability.AVAILABLE:
-            print("Windows Hello não está configurado (crie um PIN nas Configurações).")
+            print("Windows Hello is not set up (create a PIN in Settings).")
             return False
         result = await UserConsentVerifier.request_verification_async(reason)
         return result == UserConsentVerificationResult.VERIFIED
