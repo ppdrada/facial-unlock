@@ -60,26 +60,33 @@ def set_window_icon():
 
 
 class CameraWindow:
-    """Abre a webcam e a janela do app. Use com `with CameraWindow(...) as win:`."""
+    """Abre a webcam e a janela do app. Use com `with CameraWindow(...) as win:`.
 
-    def __init__(self, hint, camera_index=0):
+    Com headless=True usa só a câmera, sem abrir janela (modo da tela de bloqueio).
+    """
+
+    def __init__(self, hint, camera_index=0, headless=False):
         self.hint = hint
         self.camera_index = camera_index
+        self.headless = headless
         self.camera = None
 
     def __enter__(self):
-        set_app_icon()
+        if not self.headless:
+            set_app_icon()
         self.camera = cv2.VideoCapture(self.camera_index)
         if not self.camera.isOpened():
             raise RuntimeError("Could not open the webcam.")
-        cv2.namedWindow(WINDOW_TITLE)
-        set_window_icon()
+        if not self.headless:
+            cv2.namedWindow(WINDOW_TITLE)
+            set_window_icon()
         return self
 
     def __exit__(self, *exc):
         self.camera.release()
-        cv2.destroyAllWindows()
-        cv2.waitKey(1)  # no macOS a janela só fecha de verdade depois de processar os eventos
+        if not self.headless:
+            cv2.destroyAllWindows()
+            cv2.waitKey(1)  # no macOS a janela só fecha de verdade depois de processar os eventos
 
     def read(self):
         ok, frame = self.camera.read()
@@ -88,6 +95,8 @@ class CameraWindow:
 
     def show(self, frame, wait_ms=1):
         """Mostra o frame e retorna a tecla apertada (em minúscula)."""
+        if self.headless:
+            return ""
         self.draw_hint(frame)
         cv2.imshow(WINDOW_TITLE, frame)
         key = cv2.waitKey(wait_ms) & 0xFF
